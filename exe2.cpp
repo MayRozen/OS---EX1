@@ -8,25 +8,25 @@ double factorial(int n) {
         return n * factorial(n - 1);
 }
 
-double poisson(int k, double lambda) {
+long double poisson(int k, long double lambda) {
     return exp(-lambda) * pow(lambda, k) / factorial(k);
 }
 
 int main(int argc,char* argv[]) {
     if(argc != 2 ){
-        std::cout<<"error"<<std::endl;
+        std::cout<<"Error"<<std::endl;
         return 0;
     }
-    int k = atoi(argv[2]); // מספר ההופעות של האירוע
-    double lambda = atoi(argv[1]); // פרמטר התפלגות פואסנית
+    int k = atoi(argv[2]); // The number of appearances of the event
+    long double lambda = atoi(argv[1]); // Poisson distribution parameter
 
-    std::cout << "enter the number of shows of the event (k): ";
+    std::cout << "Enter the number of shows of the event (k): "<<std::endl;
     std::cin >> k;
 
-    std::cout << "enter the value of lambda (lambda): ";
+    std::cout << "Enter the value of lambda (lambda): "<<std::endl;
     std::cin >> lambda;
 
-    double result = poisson(k, lambda);
-    std::cout << "ההתפלגות הפואסונית למספר הופעות k = " << k << " וערך למבדה lambda = " << lambda << " היא: " << result << std::endl;
+    long double result = poisson(k, lambda);
+    std::cout << "Poisson distribution for number of appearances: " << k << "lambda value = " << lambda << " is " << result << std::endl;
     return 0;
 }
