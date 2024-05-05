@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include "exe2.hpp"
 
 double factorial(int n) {
     if (n == 0)
