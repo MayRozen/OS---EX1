@@ -1,40 +1,37 @@
 #include <iostream>
 #include <dlfcn.h>
-#include <vector>
 #include "exe2.hpp"
 
-typedef long double (*pois)();
-long double poisson(int k, long double lambda);
-void printPoisson();
+typedef long double (*pois)(int, int); // Function pointer type adjusted
+
+using namespace std;
+
+void printPoisson(pois cal) {
+    int k[5] = {1, 10, 2, 3, 3};
+    int lambda[5] = {2, 2, 2, 3, 100};
+
+    for(size_t i = 0; i < 5; i++) {
+        long double result = cal(k[i], lambda[i]); // Call the function through the function pointer with specific arguments
+        cout << result << endl;
+    }
+}
 
 int main() {
     void* lib = dlopen("./libpoisson.so", RTLD_LAZY);
     if (!lib) {
-        std::cerr << "Failed to load dynamic library: " << dlerror() << std::endl;
+        perror("Failed to load dynamic library: ");
         return -1;
     }
 
     pois cal = reinterpret_cast<pois>(dlsym(lib, "cal"));
     if (!cal) {
-        std::cerr << "Failed to find symbol: " << dlerror() << std::endl;
+        perror("Failed to find symbol: ");
         dlclose(lib);
         return 1;
     }
 
-    cal();
-
-    printPoisson();
+    printPoisson(cal);
 
     dlclose(lib);
     return 0;
-}
-
-void printPoisson(){ // Print all the results of poisson's calculations
-    std::vector<int> k = {1, 10, 2, 3, 3};
-    std::vector<long double> lambda = {2, 2, 2, 3, 100};
-
-    for(decltype(k.size()) i = 0; i < k.size(); i++) {
-        long double result = poisson(k[i], lambda[i]);
-        std::cout << result << std::endl;
-    }
 }
