@@ -1,4 +1,4 @@
 
 
 double factorial(int n);
-double poisson(int k, double lambda);
+long double poisson(int k, long double lambda);
