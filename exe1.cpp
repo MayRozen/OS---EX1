@@ -19,6 +19,6 @@ int main(int argc, char* argv[]){
     stackOverflow(*argv[1]);
     divideByZero();
     undefindAlloction(*argv[1]);
-}
 
-// Run + screenshots !
+    return 0;
+}
