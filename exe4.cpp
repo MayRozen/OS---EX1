@@ -2,11 +2,13 @@
 // algorithm. The program is for adjacency matrix
 // representation of the graph
 #include <iostream>
-using namespace std;
 #include <limits.h>
+#include <fstream>
+
+using namespace std;
 
 // Number of vertices in the graph
-#define V 9
+#define V 10000
 
 // A utility function to find the vertex with minimum
 // distance value, from the set of vertices not yet included
@@ -86,21 +88,80 @@ void dijkstra(int graph[V][V], int src)
 // driver's code
 int main()
 {
+	int graph[10000][10000]; // our Graph
 
-	/* Let us create the example graph discussed above */
-	int graph[V][V] = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
-						{ 4, 0, 8, 0, 0, 0, 0, 11, 0 },
-						{ 0, 8, 0, 7, 0, 4, 0, 0, 2 },
-						{ 0, 0, 7, 0, 9, 14, 0, 0, 0 },
-						{ 0, 0, 0, 9, 0, 10, 0, 0, 0 },
-						{ 0, 0, 4, 14, 10, 0, 2, 0, 0 },
-						{ 0, 0, 0, 0, 0, 2, 0, 1, 6 },
-						{ 8, 11, 0, 0, 0, 0, 1, 0, 7 },
-						{ 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
+//------------------------------goodFile------------------------------
+
+	fstream goodFile("good.txt"); // Creating a new text file - writing and reading
+	if(!goodFile.is_open()){
+		cout<<"Failed to open the file"<<endl;
+		return 1;
+	}
+
+	for(int i=0; i<10000; i++){ // Writing data to our text file
+		for(int j=0; j<10000; j++){
+			goodFile<<i<<endl;
+		}
+	}
+
+	for(int i=0; i<10000; i++){
+		for(int j=0; j<10000; j++){
+			goodFile>>graph[i][j];
+		}
+	}
 
 	// Function call
 	dijkstra(graph, 0);
 
+//------------------------------badFile------------------------------
+
+	fstream badFile("bad.txt"); // Creating a new text file - writing and reading
+	if(!badFile.is_open()){
+		cout<<"Failed to open the file"<<endl;
+		return 1;
+	}
+
+	for(int i=0; i<10000; i++){ // Writing data to our text file
+		for(int j=0; j<10000; j++){
+			badFile<<-i<<endl;
+		}
+	}
+
+	for(int i=0; i<10000; i++){
+		for(int j=0; j<10000; j++){
+			badFile>>graph[i][j];
+		}
+	}
+
+	// Function call
+	dijkstra(graph, 0);
+
+//------------------------------emptyFile------------------------------
+
+	fstream emptyFile("empty.txt"); // Creating a new text file - writing and reading
+	if(!emptyFile.is_open()){
+		cout<<"Failed to open the file"<<endl;
+		return 1;
+	}
+
+	for(int i=0; i<9; i++){ // Writing data to our text file
+		for(int j=0; j<9; j++){
+			emptyFile<<""<<endl;
+		}
+	}
+
+	for(int i=0; i<9; i++){
+		for(int j=0; j<9; j++){
+			emptyFile>>graph[i][j];
+		}
+	}
+
+	// Function call
+	dijkstra(graph, 0);
+
+	goodFile.close();
+	badFile.close();
+	emptyFile.close();
 	return 0;
 }
 
