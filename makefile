@@ -1,33 +1,33 @@
 # ------------------------------exe1------------------------------
-CXX=clang++
-CXXFLAGS=-std=c++11 -Werror -Wsign-conversion -g  # Added -g flag for debugging symbols
-VALGRIND_FLAGS=-v --leak-check=full --show-leak-kinds=all  --error-exitcode=99
+# CXX=clang++
+# CXXFLAGS=-std=c++11 -Werror -Wsign-conversion -g  # Added -g flag for debugging symbols
+# VALGRIND_FLAGS=-v --leak-check=full --show-leak-kinds=all  --error-exitcode=99
 
-SOURCES=exe1.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
+# SOURCES=exe1.cpp
+# OBJECTS=$(SOURCES:.cpp=.o)
 
-.PHONY: all run tidy clean
+# .PHONY: all run tidy clean
 
-all: exe1
+# all: exe1
 
-run: exe1
-	./exe1
+# run: exe1
+# 	./exe1
 
-exe1: exe1.o $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+# exe1: exe1.o $(OBJECTS)
+# 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-tidy:
-	clang-tidy $(SOURCES) $(HEADERS) -checks=bugprone-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-owning-memory --warnings-as-errors=-* --
+# tidy:
+# 	clang-tidy $(SOURCES) $(HEADERS) -checks=bugprone-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-owning-memory --warnings-as-errors=-* --
 
-%.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+# %.o: %.cpp $(HEADERS)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-clean:
-	rm -f *.o exe1
+# clean:
+# 	rm -f *.o exe1
 
-# Target to open core file in gdb
-core: exe1
-	gdb ./exe1 core
+# # Target to open core file in gdb
+# core: exe1
+# 	gdb ./exe1 core
 
 
 # ------------------------------exe2------------------------------
@@ -59,33 +59,50 @@ core: exe1
 
 
 # ------------------------------exe3------------------------------
-# SOURCES=exe3.cpp  # Remove exe2.cpp from SOURCES
-# OBJECTS=$(SOURCES:.cpp=.o)
-# LIBRARY=libpoisson.so  # dynamic library
+# Define the source files
+SOURCES_EXE3 = exe3.cpp
+SOURCES_LIB = exe2.hpp
 
-# CXXFLAGS=-std=c++11 -Werror -Wsign-conversion -g -fPIC  # Add -fPIC flag here
+# Define the object files
+OBJECTS_EXE3 = $(SOURCES_EXE3:.cpp=.o)
+OBJECTS_LIB = $(SOURCES_LIB:.hpp=.o)
 
-# .PHONY: all run tidy clean
+# Define the shared library name
+LIBRARY = libpoisson.so
 
-# all: exe3
+# Compiler and flags
+CXX = clang++
+CXXFLAGS = -std=c++11 -Werror -Wsign-conversion -g -fPIC
+LDFLAGS = -ldl
 
-# run: exe3
-# 	./exe3
+.PHONY: all run tidy clean
 
-# exe3: $(OBJECTS) $(LIBRARY)
-# 	$(CXX) $(CXXFLAGS) $^ -o $@
+# Default target
+all: exe3
 
-# $(LIBRARY): $(OBJECTS)
-# 	$(CXX) -shared $^ -o $@
+# Run target
+run: exe3
+	./exe3
 
-# tidy:
-# 	clang-tidy $(SOURCES) $(HEADERS) -checks=bugprone-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-owning-memory --warnings-as-errors=-* --
+# Executable target
+exe3: $(OBJECTS_EXE3) $(LIBRARY)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -Wl,-rpath,.
 
-# %.o: %.cpp $(HEADERS)
-# 	$(CXX) $(CXXFLAGS) -c $< -o $@
+# Shared library target
+$(LIBRARY): $(OBJECTS_LIB)
+	$(CXX) -shared -o $@ $^
 
-# clean:
-# 	rm -f *.o exe3 $(LIBRARY)
+# Clang-tidy target
+tidy:
+	clang-tidy $(SOURCES_EXE3) $(SOURCES_LIB) -checks=bugprone-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-owning-memory --warnings-as-errors=-*
+
+# Object file compilation
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean target
+clean:
+	rm -f *.o exe3 $(LIBRARY)
 
 # ------------------------------exe4------------------------------
 # CXX=clang++
