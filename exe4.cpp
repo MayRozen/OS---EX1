@@ -144,14 +144,14 @@ int main()
 		return 1;
 	}
 
-	for(int i=0; i<9; i++){ // Writing data to our text file
-		for(int j=0; j<9; j++){
+	for(int i=0; i<10000; i++){ // Writing data to our text file
+		for(int j=0; j<10000; j++){
 			emptyFile<<""<<endl;
 		}
 	}
 
-	for(int i=0; i<9; i++){
-		for(int j=0; j<9; j++){
+	for(int i=0; i<10000; i++){
+		for(int j=0; j<10000; j++){
 			emptyFile>>graph[i][j];
 		}
 	}
