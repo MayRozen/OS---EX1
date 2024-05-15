@@ -1,44 +1,49 @@
-// Need to be like this: Nezer Zaidenberg,054-5531415\n -> c language
-
 #include <iostream>
 #include <vector>
 #include <unistd.h> // For fork(), getpid()
 #include <sys/wait.h> // For wait()
-#include <fstream> // For file I/O
 
 // Define a structure to represent a contact
 struct Contact {
-    std::string name;
-    std::string phoneNumber;
+    char name[100];
+    char phoneNumber[100];
 };
 
-// Function to add a contact to a text file
-void add2PB(const std::string& filename, const Contact& contact) {
-    std::ofstream outFile(filename, std::ios_base::app); // Open file in append mode
-    if (outFile.is_open()) {
-        outFile << contact.name << "," << contact.phoneNumber << std::endl;
-        std::cout << "Contact added to file: " << filename << std::endl;
-    } else {
-        std::cerr << "Unable to open file: " << filename << std::endl;
-    }
-    outFile.close();
-    return;
+// Function to add a contact to a pipe
+void add2PB(int pipefd[2], const Contact& contact) {
+    // Close the read end of the pipe since we are writing
+    close(pipefd[0]);
+
+    // Write the contact data to the pipe
+    write(pipefd[1], &contact, sizeof(contact));
+
+    // Close the write end of the pipe after writing
+    close(pipefd[1]);
 }
 
+// Function to read contacts from a pipe
+void readFromPipe(int pipefd[2], std::vector<Contact>& telephoneBook) {
+    // Close the write end of the pipe since we are reading
+    close(pipefd[1]);
 
-// This function is only for comparing with the runnings' results
-std::string findPhone(const std::vector<Contact>& contacts, const std::string& name){
-    for (const auto& contact : contacts) {
-        if (contact.name == name) {
-            return contact.name; // Name found
-        }
+    // Read contacts from the pipe
+    Contact contact;
+    while (read(pipefd[0], &contact, sizeof(contact)) > 0) {
+        telephoneBook.push_back(contact);
     }
-    std::cout<<"This name is not found."<<std::endl; // Name not found
-    return;
+
+    // Close the read end of the pipe after reading
+    close(pipefd[0]);
 }
 
+int main(int argc, char* argv[]) {
+    // Create a pipe
+    int pipefd[2];
+    if (pipe(pipefd) == -1) {
+        perror("pipe");
+        return 1;
+    }
 
-int main(int argc, std::vector<Contact> telephoneBook) {
     // Fork a child process
     pid_t pid = fork();
 
@@ -46,9 +51,17 @@ int main(int argc, std::vector<Contact> telephoneBook) {
         // Child process: Data management
         std::cout << "Child process (PID: " << getpid() << ") for data management" << std::endl;
 
-        std::string filename = "new_file.txt"; // Creating a new text file
-        for(int i=0; i<argc; i++){
-            add2PB(filename ,telephoneBook[i]);
+        // Close the unused end of the pipe
+        close(pipefd[1]);
+
+        // Read contacts from the pipe and add to telephone book
+        std::vector<Contact> telephoneBook;
+        readFromPipe(pipefd, telephoneBook);
+
+        // Displaying contacts (for verification)
+        std::cout << "Contacts in telephone book:" << std::endl;
+        for (const auto& contact : telephoneBook) {
+            std::cout << "Name: " << contact.name << ", Phone: " << contact.phoneNumber << std::endl;
         }
 
         // Terminate child process
@@ -57,14 +70,20 @@ int main(int argc, std::vector<Contact> telephoneBook) {
         // Parent process: User interface
         std::cout << "Parent process (PID: " << getpid() << ") for user interface" << std::endl;
 
+        // Close the unused end of the pipe
+        close(pipefd[0]);
+
+        // Prepare contacts
+        std::vector<Contact> telephoneBook;
+        for (int i = 1; i < argc; i += 2) {
+            Contact contact;
+            snprintf(contact.name, sizeof(contact.name), "%s", argv[i]);
+            snprintf(contact.phoneNumber, sizeof(contact.phoneNumber), "%s", argv[i + 1]);
+            add2PB(pipefd, contact);
+        }
+
         // Wait for the child process to finish
         wait(nullptr);
-
-        // Displaying contacts
-        std::cout << "Contacts in telephone book:" << std::endl;
-        for (const auto& contact : telephoneBook) {
-            std::cout << "Name: " << contact.name << ", Phone: " << contact.phoneNumber << std::endl;
-        }
     } else {
         // Fork failed
         std::cerr << "Fork failed" << std::endl;
