@@ -77,8 +77,9 @@ int main(int argc, char* argv[]) {
         std::vector<Contact> telephoneBook;
         for (int i = 1; i < argc; i += 2) {
             Contact contact;
-            snprintf(contact.name, sizeof(contact.name), "%s", argv[i]);
-            snprintf(contact.phoneNumber, sizeof(contact.phoneNumber), "%s", argv[i + 1]);
+            // Combine the current argument (name) and the next argument (phone number)
+            snprintf(contact.name, sizeof(contact.name), "%.99s", argv[i]);
+            snprintf(contact.phoneNumber, sizeof(contact.phoneNumber), "%.99s", argv[i + 1]);
             add2PB(pipefd, contact);
         }
 
