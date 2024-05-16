@@ -22,7 +22,7 @@ void add2PB(int pipefd[2], const Contact& contact) {
 }
 
 // Function to read contacts from a pipe
-void readFromPipe(int pipefd[2], std::vector<Contact>& telephoneBook) {
+void findPhone(int pipefd[2], std::vector<Contact>& telephoneBook) {
     // Close the write end of the pipe since we are reading
     close(pipefd[1]);
 
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 
         // Read contacts from the pipe and add to telephone book
         std::vector<Contact> telephoneBook;
-        readFromPipe(pipefd, telephoneBook);
+        findPhone(pipefd, telephoneBook);
 
         // Displaying contacts (for verification)
         std::cout << "Contacts in telephone book:" << std::endl;
