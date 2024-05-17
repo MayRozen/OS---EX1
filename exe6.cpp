@@ -4,6 +4,8 @@
 #include <sys/wait.h>  // For wait()
 #include <sys/types.h> // For pid_t
 #include <cstring>     // For strncpy
+#include <sys/stat.h>  // For S_IFREG constant
+#include <fstream>  // For file operations
 
 // Define a structure to represent a contact
 struct Contact {
@@ -30,93 +32,121 @@ void findPhone(int pipefd[2], std::vector<Contact>& telephoneBook) {
 
     // Read contacts from the pipe
     Contact contact;
-    while (read(pipefd[0], &contact, sizeof(contact)) > 0) {
+    ssize_t bytesRead;
+    while ((bytesRead = read(pipefd[0], &contact, sizeof(Contact))) > 0) {
+        if (bytesRead != sizeof(Contact)) {
+            std::cerr << "Error: Incomplete read from pipe" << std::endl;
+            return;
+        }
         telephoneBook.push_back(contact);
+    }
+
+    // Check for read errors
+    if (bytesRead == -1) {
+        std::cerr << "Error: Failed to read from pipe" << std::endl;
+        return;
     }
 
     // Close the read end of the pipe after reading
     close(pipefd[0]);
 }
+// Function to create and populate the phonebook.txt file
+void createPhoneBookFile() {
+    std::ofstream phoneBookFile("phonebook.txt"); // Create the file
+    if (!phoneBookFile) {
+        std::cerr << "Error: Failed to create phonebook.txt" << std::endl;
+        return;
+    }
+
+    // Write sample data to the file
+    phoneBookFile << "John Doe,1234567890" << std::endl;
+    phoneBookFile << "Jane Smith,9876543210" << std::endl;
+
+    // Close the file
+    phoneBookFile.close();
+}
 
 int main(int argc, char* argv[]) {
 
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <full_name> <phone_number>" << std::endl;
+    if (argc <= 1){
+        std::cerr<<"Error: no enough arguments"<<std::endl;
         return 1;
     }
 
-    // Extracting the full name and phone number from command-line arguments
-    char* full_name = argv[1];
-    char* phone_number = argv[2];
-
-    // Find the position of the last comma in the full name
-    char* last_comma_position = strrchr(full_name, ',');
-    if (last_comma_position == nullptr) {
-        std::cerr << "Error: No comma found in the full name." << std::endl;
+    if (argc > 3){
+        std::cerr<<"Error: too many arguments"<<std::endl;
         return 1;
     }
+    // Create the phonebook.txt file
+    createPhoneBookFile();
 
-    // Splitting the full name into first name and last name
-    *last_comma_position = '\0'; // Replace the last comma with null terminator
-    char* first_name = full_name;
-    char* last_name = last_comma_position + 1;
+    char *name_to_search = argv[1]; // The name which want to search
 
     // Create a pipe
     int pipefd[2];
     if (pipe(pipefd) == -1) {
-        perror("pipe");
+        std::cerr<<"Error: pipe"<<std::endl;
         return 1;
     }
 
     pid_t pid_grep, pid_cut, pid_sed;
-
-    // First child process for the grep command
-    if ((pid_grep = fork()) == 0) {
-        std::cout << "Child1 process (PID: " << getpid() << ")" << std::endl;
+    // Child process for the grep command
+    // grep, egrep, fgrep, rgrep - print lines that match patterns
+    if ((pid_grep = fork()) == 0)
+    {
+        // Child process
+        std::cout<<"Child1 process"<<getpid()<<std::endl;
         dup2(pipefd[1], STDOUT_FILENO); // Redirect the output of the process to the write end of the pipe
         close(pipefd[0]); // Close the read end of the pipe
         close(pipefd[1]); // Close the write end of the pipe
-        execlp("grep", "grep", last_name, "phonebook.txt", NULL); // Execute the grep command
-        perror("execlp");
-        return 1;
-    } else if (pid_grep == -1) {
-        perror("fork");
+        execlp("grep", "grep", argv[1], "phonebook.txt", NULL); // Execute the grep command
+        std::cerr<<"Error: execlp"<<std::endl; // Usually after execlp it goes out form the fork
+        return 1; // For the error
+    } else if (pid_grep == -1){
+        std::cerr<<"Error: fork"<<std::endl; 
         return 1;
     }
 
-    // Second child process for the cut command
-    if ((pid_cut = fork()) == 0) {
-        std::cout << "Child2 process (PID: " << getpid() << ")" << std::endl;
+    // Second child process for cut command
+    // cut - remove sections from each line of files
+    if ((pid_cut = fork()) == 0){
+        // Child process
+        std::cout<<"Child2 process"<< getpid()<<std::endl; 
         dup2(pipefd[0], STDIN_FILENO); // Redirect the input of the process to the read end of the pipe
         close(pipefd[0]); // Close the read end of the pipe
         close(pipefd[1]); // Close the write end of the pipe
-        execlp("cut", "cut", "-d,", "-f2", NULL); // Execute the cut command
-        perror("execlp");
-        return 1;
-    } else if (pid_cut == -1) {
-        perror("fork");
+        execlp("cut", "cut", "-d,", "-f2", NULL); // Execute the sed command, -d, is the delimiter and -f2 is the field number
+                                                  // -f 1 will return the name, -f 2 will return the phone number
+        std::cerr<<"Error: execlp"<<std::endl; // Usually after execlp it goes out form the fork
+        return 1; // For the error
+    } else if (pid_cut == -1){
+        std::cerr<<"Error: fork"<<std::endl;
         return 1;
     }
 
-    // Third child process for the sed command
-    if ((pid_sed = fork()) == 0) {
-        std::cout << "Child3 process (PID: " << getpid() << ")" << std::endl;
+    // for changing the space to nothing by sed
+    // sed - stream editor for filtering and transforming text
+    if ((pid_sed = fork()) == 0){
+        // Child process
+        std::cout<<"Child3 process"<<getpid()<<std::endl;
+        dup2(pipefd[0], STDIN_FILENO); // Redirect the input of the process to the read end of the pipe
         close(pipefd[0]); // Close the read end of the pipe
         close(pipefd[1]); // Close the write end of the pipe
-        execlp("sed", "sed", "s/ //g", NULL); // Execute the sed command
-        perror("execlp");
-        return 1;
-    } else if (pid_sed == -1) {
-        perror("fork");
+        execlp("sed", "sed", "s/ //g", NULL); // Execute the cut command
+        std::cerr<<"Error: execlp"<<std::endl; // Usually after execlp it goes out form the fork
+        return 1; // For the error
+    } else if (pid_sed == -1){
+        std::cerr<<"Error: fork"<<std::endl;
         return 1;
     }
 
-    std::cout << "Parent process (PID: " << getpid() << ")" << std::endl;
-    // Close all pipe ends in the parent process
-    close(pipefd[0]);
-    close(pipefd[1]);
+    std::cout<<"Parent process"<<getpid()<<std::endl;
+    // closing parent process
+    close(pipefd[0]); // Close the read end of the pipe
+    close(pipefd[1]); // Close the write end of the pipe
 
-    // Wait for all child processes to finish
+    // waiting for the child to finish. By waiting for all 3 of them it will be one after another
+    // All of this replacing the grep "name" phonebook.txt | cut -d"," -f 2 | sed 's/ //g'
     waitpid(pid_grep, NULL, 0);
     waitpid(pid_cut, NULL, 0);
     waitpid(pid_sed, NULL, 0);
