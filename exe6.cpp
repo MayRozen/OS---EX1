@@ -14,15 +14,18 @@ struct Contact {
 };
 
 // Function to add a contact to a pipe
-void add2PB(int pipefd[2], const Contact& contact) {
-    // Close the read end of the pipe since we are writing
-    close(pipefd[0]);
+void add2PB(int argc, char* argv[]) {
+            
+    const char *filename = "phonebook.txt";
+    std::ofstream file;
+    file.open(filename, std::ios::app);
+    if (!file) {
+        std::perror("Failed to open file");
+        return;
+    }
 
-    // Write the contact data to the pipe
-    write(pipefd[1], &contact, sizeof(contact));
-
-    // Close the write end of the pipe after writing
-    close(pipefd[1]);
+    file << argv[1] << argv[2] << '\n';
+    file.close();
 }
 
 // Function to read contacts from a pipe
@@ -51,32 +54,34 @@ void findPhone(int pipefd[2], std::vector<Contact>& telephoneBook) {
     close(pipefd[0]);
 }
 // Function to create and populate the phonebook.txt file
-void createPhoneBookFile() {
+int createPhoneBookFile() {
     std::ofstream phoneBookFile("phonebook.txt"); // Create the file
     if (!phoneBookFile) {
         std::cerr << "Error: Failed to create phonebook.txt" << std::endl;
-        return;
+        return -1;
     }
 
     // Write sample data to the file
-    phoneBookFile << "John Doe,1234567890" << std::endl;
-    phoneBookFile << "Jane Smith,9876543210" << std::endl;
+    phoneBookFile << "John Doe, 1234567890" << std::endl;
+    phoneBookFile << "Jane Smith, 9876543210" << std::endl;
 
     // Close the file
     phoneBookFile.close();
+    return 1;
 }
 
 int main(int argc, char* argv[]) {
 
     if (argc <= 1){
-        std::cerr<<"Error: no enough arguments"<<std::endl;
+        std::cerr<<"Error: not enough arguments"<<std::endl;
         return 1;
     }
 
-    if (argc > 3){
+    else if (argc > 3){
         std::cerr<<"Error: too many arguments"<<std::endl;
         return 1;
     }
+    
     // Create the phonebook.txt file
     createPhoneBookFile();
 
@@ -88,7 +93,9 @@ int main(int argc, char* argv[]) {
         std::cerr<<"Error: pipe"<<std::endl;
         return 1;
     }
-
+    if(argc == 3){
+       add2PB(argc,argv); 
+    }
     pid_t pid_grep, pid_cut, pid_sed;
     // Child process for the grep command
     // grep, egrep, fgrep, rgrep - print lines that match patterns
@@ -112,7 +119,7 @@ int main(int argc, char* argv[]) {
     if ((pid_cut = fork()) == 0){
         // Child process
         std::cout<<"Child2 process"<< getpid()<<std::endl; 
-        dup2(pipefd[0], STDIN_FILENO); // Redirect the input of the process to the read end of the pipe
+        dup2(pipefd[1], STDIN_FILENO); // Redirect the input of the process to the read end of the pipe
         close(pipefd[0]); // Close the read end of the pipe
         close(pipefd[1]); // Close the write end of the pipe
         execlp("cut", "cut", "-d,", "-f2", NULL); // Execute the sed command, -d, is the delimiter and -f2 is the field number
@@ -128,7 +135,7 @@ int main(int argc, char* argv[]) {
     // sed - stream editor for filtering and transforming text
     if ((pid_sed = fork()) == 0){
         // Child process
-        std::cout<<"Child3 process"<<getpid()<<std::endl;
+        std::cout << "Child3 process" << getpid() << std::endl;
         dup2(pipefd[0], STDIN_FILENO); // Redirect the input of the process to the read end of the pipe
         close(pipefd[0]); // Close the read end of the pipe
         close(pipefd[1]); // Close the write end of the pipe
