@@ -174,7 +174,7 @@ VALGRIND_FLAGS = -v --leak-check=full --show-leak-kinds=all --error-exitcode=99
 
 SOURCES = exe6.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
-EXECUTABLE = exe6
+EXECUTABLE = exe6 findPhone
 
 .PHONY: all clean valgrind
 
