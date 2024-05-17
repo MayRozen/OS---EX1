@@ -133,6 +133,7 @@
 
 # clean:
 # 	rm -f *.o exe4 $(LIBRARY)
+
 # ------------------------------exe5------------------------------
 # CXX=clang++
 # CXXFLAGS=-std=c++11 -Werror -Wsign-conversion -pg  # Added -pg flag for profiling
@@ -174,7 +175,7 @@ VALGRIND_FLAGS = -v --leak-check=full --show-leak-kinds=all --error-exitcode=99
 
 SOURCES = exe6.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
-EXECUTABLE = exe6 findPhone
+EXECUTABLE = exe6 findPhone add2PB
 
 .PHONY: all clean valgrind
 
