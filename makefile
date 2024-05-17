@@ -191,4 +191,4 @@ valgrind: $(EXECUTABLE)
 	valgrind $(VALGRIND_FLAGS) ./$(EXECUTABLE)
 
 clean:
-	rm -f $(EXECUTABLE) $(OBJECTS)
+	rm -f $(EXECUTABLE) $(OBJECTS) *.txt
