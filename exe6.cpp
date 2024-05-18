@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     createPhoneBookFile();
     int fileDescriptor = open("phonebook.txt", O_RDWR | O_APPEND); // open the file in read only and apped mode
     
-    if (fileDescriptor == -1){
+    if (fileDescriptor == -1){ // Checking if the file open successfully
         std::cerr << "Error: open" << std::endl;
         return 1;
     }
@@ -58,19 +58,17 @@ int main(int argc, char* argv[]) {
         {
             // This is like, FILE *fileDescriptor = fopen("phonebook.txt", "w+");
 
-            // instead of output to the screen we want it to the file
+            // instead of output to the screen we wiil put it into the file
             dup2(fileDescriptor, STDOUT_FILENO); // Redirect the output of the process to the write end of the pipe
-            close(fileDescriptor);               // Close the file descriptor, beacuse we;ve redirected the output to the file
+            close(fileDescriptor);               // Close the file descriptor, beacuse we have redirected the output to the file
 
-            if (i == argc - 1) // last argument, after it do echo to go down to the next line
-            {
+            if (i == argc - 1){ // last argument, after it do echo to go down to the next line
                 execlp("echo", "echo", argv[i], NULL); // Execute the echo command
             }
-            else
-            {                                                    // If we have spaces between the arguments
+            else{                                                    // If we have spaces between the arguments
                 execlp("echo", "echo", "-n", argv[i], "", NULL); // Execute the echo command
             } // -n tells don't print the new line after each echo
-            perror("execlp"); // Usually after execlp it goes out form the fork
+            std::cerr << "execlp" << std::endl; // Usually after execlp it goes out form the fork
             return 1;         // For the error
         }
     }
