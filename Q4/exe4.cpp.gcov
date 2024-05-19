@@ -1,0 +1,170 @@
+        -:    0:Source:exe4.cpp
+        -:    0:Graph:exe4.gcno
+        -:    0:Data:exe4.gcda
+        -:    0:Runs:1
+        -:    1:// C++ program for Dijkstra's single source shortest path
+        -:    2:// algorithm. The program is for adjacency matrix
+        -:    3:// representation of the graph
+        -:    4:#include <iostream>
+        -:    5:#include <limits.h>
+        -:    6:#include <fstream>
+        -:    7:
+        -:    8:using namespace std;
+        -:    9:
+        -:   10:// Number of vertices in the graph
+        -:   11:#define V 100
+        -:   12:
+        -:   13:// A utility function to find the vertex with minimum
+        -:   14:// distance value, from the set of vertices not yet included
+        -:   15:// in shortest path tree
+      297:   16:int minDistance(int dist[], bool sptSet[])
+        -:   17:{
+        -:   18:
+        -:   19:	// Initialize min value
+      297:   20:	int min = INT_MAX, min_index;
+        -:   21:
+    29997:   22:	for (int v = 0; v < V; v++)
+    29700:   23:		if (sptSet[v] == false && dist[v] <= min)
+    14850:   24:			min = dist[v], min_index = v;
+        -:   25:
+      297:   26:	return min_index;
+        -:   27:}
+        -:   28:
+        -:   29:// A utility function to print the constructed distance
+        -:   30:// array
+        3:   31:void printSolution(int dist[])
+        -:   32:{
+        3:   33:	cout << "Vertex \t Distance from Source" << endl;
+      303:   34:	for (int i = 0; i < V; i++)
+      300:   35:		cout << i << " \t\t\t\t" << dist[i] << endl;
+        3:   36:}
+        -:   37:
+        -:   38:// Function that implements Dijkstra's single source
+        -:   39:// shortest path algorithm for a graph represented using
+        -:   40:// adjacency matrix representation
+        3:   41:void dijkstra(int graph[V][V], int src)
+        -:   42:{
+        -:   43:	int dist[V]; // The output array. dist[i] will hold the
+        -:   44:				// shortest
+        -:   45:	// distance from src to i
+        -:   46:
+        -:   47:	bool sptSet[V]; // sptSet[i] will be true if vertex i is
+        -:   48:					// included in shortest
+        -:   49:	// path tree or shortest distance from src to i is
+        -:   50:	// finalized
+        -:   51:
+        -:   52:	// Initialize all distances as INFINITE and stpSet[] as
+        -:   53:	// false
+      303:   54:	for (int i = 0; i < V; i++)
+      300:   55:		dist[i] = INT_MAX, sptSet[i] = false;
+        -:   56:
+        -:   57:	// Distance of source vertex from itself is always 0
+        3:   58:	dist[src] = 0;
+        -:   59:
+        -:   60:	// Find shortest path for all vertices
+      300:   61:	for (int count = 0; count < V - 1; count++) {
+        -:   62:		// Pick the minimum distance vertex from the set of
+        -:   63:		// vertices not yet processed. u is always equal to
+        -:   64:		// src in the first iteration.
+      297:   65:		int u = minDistance(dist, sptSet);
+        -:   66:
+        -:   67:		// Mark the picked vertex as processed
+      297:   68:		sptSet[u] = true;
+        -:   69:
+        -:   70:		// Update dist value of the adjacent vertices of the
+        -:   71:		// picked vertex.
+    29997:   72:		for (int v = 0; v < V; v++)
+        -:   73:
+        -:   74:			// Update dist[v] only if is not in sptSet,
+        -:   75:			// there is an edge from u to v, and total
+        -:   76:			// weight of path from src to v through u is
+        -:   77:			// smaller than current value of dist[v]
+    29700:   78:			if (!sptSet[v] && graph[u][v]
+     2256:   79:				&& dist[u] != INT_MAX
+    #####:   80:				&& dist[u] + graph[u][v] < dist[v])
+    #####:   81:				dist[v] = dist[u] + graph[u][v];
+        -:   82:	}
+        -:   83:
+        -:   84:	// print the constructed distance array
+        3:   85:	printSolution(dist);
+        3:   86:}
+        -:   87:
+        -:   88:// driver's code
+        1:   89:int main()
+        -:   90:{
+        -:   91:	int graph[100][100]; // our Graph
+        -:   92:
+        -:   93://------------------------------goodFile------------------------------
+        -:   94:
+        1:   95:	fstream goodFile("good.txt",ios::in | ios::out | ios::trunc); // Creating a new text file - writing and reading
+        1:   96:	if(!goodFile.is_open()){
+    #####:   97:		cout<<"Failed to open the good.txt file"<<endl;
+    #####:   98:		return 1;
+        -:   99:	}
+        -:  100:
+      101:  101:	for(int i=0; i<100; i++){ // Writing data to our text file
+    10100:  102:		for(int j=0; j<100; j++){
+    10000:  103:			goodFile<<i<<endl;
+        -:  104:		}
+        -:  105:	}
+        -:  106:
+      101:  107:	for(int i=0; i<100; i++){
+    10100:  108:		for(int j=0; j<100; j++){
+    10000:  109:			goodFile>>graph[i][j];
+        -:  110:		}
+        -:  111:	}
+        -:  112:
+        -:  113:	// Function call
+        1:  114:	dijkstra(graph, 0);
+        -:  115:
+        -:  116://------------------------------badFile------------------------------
+        -:  117:
+        1:  118:	fstream badFile("bad.txt",ios::in | ios::out | ios::trunc); // Creating a new text file - writing and reading
+        1:  119:	if(!badFile.is_open()){
+    #####:  120:		cout<<"Failed to open the bad.txt file"<<endl;
+    #####:  121:		return 1;
+        -:  122:	}
+        -:  123:
+      101:  124:	for(int i=0; i<100; i++){ // Writing data to our text file
+    10100:  125:		for(int j=0; j<100; j++){
+    10000:  126:			badFile<<-i<<endl;
+        -:  127:		}
+        -:  128:	}
+        -:  129:
+      101:  130:	for(int i=0; i<100; i++){
+    10100:  131:		for(int j=0; j<100; j++){
+    10000:  132:			badFile>>graph[i][j];
+        -:  133:		}
+        -:  134:	}
+        -:  135:
+        -:  136:	// Function call
+        1:  137:	dijkstra(graph, 0);
+        -:  138:
+        -:  139://------------------------------emptyFile------------------------------
+        -:  140:
+        1:  141:	fstream emptyFile("empty.txt",ios::in | ios::out | ios::trunc); // Creating a new text file - writing and reading
+        1:  142:	if(!emptyFile.is_open()){
+    #####:  143:		cout<<"Failed to open the empty.txt file"<<endl;
+    #####:  144:		return 1;
+        -:  145:	}
+        -:  146:
+      101:  147:	for(int i=0; i<100; i++){ // Writing data to our text file
+    10100:  148:		for(int j=0; j<100; j++){
+    10000:  149:			emptyFile<<""<<endl;
+        -:  150:		}
+        -:  151:	}
+        -:  152:
+      101:  153:	for(int i=0; i<100; i++){
+    10100:  154:		for(int j=0; j<100; j++){
+    10000:  155:			emptyFile>>graph[i][j];
+        -:  156:		}
+        -:  157:	}
+        -:  158:
+        -:  159:	// Function call
+        1:  160:	dijkstra(graph, 0);
+        -:  161:
+        1:  162:	goodFile.close();
+        1:  163:	badFile.close();
+        1:  164:	emptyFile.close();
+        1:  165:	return 0;
+        1:  166:}
