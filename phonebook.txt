@@ -1,4 +1,0 @@
-John Doe,1234567890
-Jane Smith,9876543210
-hadar, 22222
-may, 666688
