@@ -8,7 +8,7 @@
 using namespace std;
 
 // Number of vertices in the graph
-#define V 10000
+#define V 100
 
 // A utility function to find the vertex with minimum
 // distance value, from the set of vertices not yet included
@@ -88,24 +88,24 @@ void dijkstra(int graph[V][V], int src)
 // driver's code
 int main()
 {
-	int graph[10000][10000]; // our Graph
+	int graph[100][100]; // our Graph
 
 //------------------------------goodFile------------------------------
 
-	fstream goodFile("good.txt"); // Creating a new text file - writing and reading
+	fstream goodFile("good.txt",ios::in | ios::out | ios::trunc); // Creating a new text file - writing and reading
 	if(!goodFile.is_open()){
-		cout<<"Failed to open the file"<<endl;
+		cout<<"Failed to open the good.txt file"<<endl;
 		return 1;
 	}
 
-	for(int i=0; i<10000; i++){ // Writing data to our text file
-		for(int j=0; j<10000; j++){
+	for(int i=0; i<100; i++){ // Writing data to our text file
+		for(int j=0; j<100; j++){
 			goodFile<<i<<endl;
 		}
 	}
 
-	for(int i=0; i<10000; i++){
-		for(int j=0; j<10000; j++){
+	for(int i=0; i<100; i++){
+		for(int j=0; j<100; j++){
 			goodFile>>graph[i][j];
 		}
 	}
@@ -115,20 +115,20 @@ int main()
 
 //------------------------------badFile------------------------------
 
-	fstream badFile("bad.txt"); // Creating a new text file - writing and reading
+	fstream badFile("bad.txt",ios::in | ios::out | ios::trunc); // Creating a new text file - writing and reading
 	if(!badFile.is_open()){
-		cout<<"Failed to open the file"<<endl;
+		cout<<"Failed to open the bad.txt file"<<endl;
 		return 1;
 	}
 
-	for(int i=0; i<10000; i++){ // Writing data to our text file
-		for(int j=0; j<10000; j++){
+	for(int i=0; i<100; i++){ // Writing data to our text file
+		for(int j=0; j<100; j++){
 			badFile<<-i<<endl;
 		}
 	}
 
-	for(int i=0; i<10000; i++){
-		for(int j=0; j<10000; j++){
+	for(int i=0; i<100; i++){
+		for(int j=0; j<100; j++){
 			badFile>>graph[i][j];
 		}
 	}
@@ -138,20 +138,20 @@ int main()
 
 //------------------------------emptyFile------------------------------
 
-	fstream emptyFile("empty.txt"); // Creating a new text file - writing and reading
+	fstream emptyFile("empty.txt",ios::in | ios::out | ios::trunc); // Creating a new text file - writing and reading
 	if(!emptyFile.is_open()){
-		cout<<"Failed to open the file"<<endl;
+		cout<<"Failed to open the empty.txt file"<<endl;
 		return 1;
 	}
 
-	for(int i=0; i<10000; i++){ // Writing data to our text file
-		for(int j=0; j<10000; j++){
+	for(int i=0; i<100; i++){ // Writing data to our text file
+		for(int j=0; j<100; j++){
 			emptyFile<<""<<endl;
 		}
 	}
 
-	for(int i=0; i<10000; i++){
-		for(int j=0; j<10000; j++){
+	for(int i=0; i<100; i++){
+		for(int j=0; j<100; j++){
 			emptyFile>>graph[i][j];
 		}
 	}
@@ -164,5 +164,3 @@ int main()
 	emptyFile.close();
 	return 0;
 }
-
-// This code is contributed by shivanisinghss2110
